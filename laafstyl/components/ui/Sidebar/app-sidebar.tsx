@@ -1,41 +1,65 @@
-import {Sidebar,SidebarContent,SidebarFooter,SidebarGroup,SidebarGroupLabel,SidebarGroupContent,SidebarMenu,SidebarMenuButton,SidebarMenuItem,SidebarHeader, SidebarRail} from "@/components/ui/Sidebar/index"
-import { NavUser } from "../navigation/nav-user"
-export function AppSidebar({items}:{items:any}){
+"use client"
 
-    const data = {
-      user:{
-        name: "shadcn",
-        email: "m@example.com",
-        avatar: "https://github.com/shadcn.png",
-      }
-    }
-    return (
-        <Sidebar collapsible="icon">
-          <SidebarHeader>
-            <img src="/Logo.jpeg" alt="logo" width={128} height={128} className="m-auto" />
-          </SidebarHeader>
-          <SidebarContent>
-            <SidebarGroup>
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {items.map((item:any) => (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton asChild>
-                        <a href={item.url}>
-                          <item.icon />
-                          <span>{item.title}</span>
-                        </a>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  ))}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </SidebarGroup>
-          </SidebarContent>
-          
-          <SidebarFooter>
-            <NavUser user={data.user} />
-          </SidebarFooter>
-        </Sidebar>
-      )
+import * as React from "react"
+import {
+  Home,
+  Building,
+  Users,
+  LucideIcon,
+  Panda
+} from "lucide-react"
+
+import { NavMain } from "@/components/ui/navigation/nav-main"
+import { NavUser } from "@/components/ui/navigation/nav-user"
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@/components/ui/Sidebar/index"
+
+// Icon map to resolve icon names to components
+const iconMap: Record<string, LucideIcon> = {
+  Home,
+  Building,
+  Users,
+}
+
+export function AppSidebar({ user, navMain, ...props }: React.ComponentProps<typeof Sidebar> & { user: { name: string, email: string, avatar: string }, navMain: { title: string, url: string, icon: string }[] }) {
+  // Resolve icon names to icon components
+  const navMainWithIcons = React.useMemo(() => {
+    return navMain.map(item => ({
+      ...item,
+      icon: item.icon ? iconMap[item.icon] : undefined,
+    }))
+  }, [navMain])
+  return (
+    <Sidebar collapsible="offcanvas" {...props} >
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton
+              asChild
+              className="data-[slot=sidebar-menu-button]:!p-1.5"
+            >
+              <a href="/" className="flex items-center justify-center gap-2">
+                <Panda className="w-6 h-6" />
+                <span className="text-base font-semibold ">LaafStyl</span>
+              </a>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarHeader>
+      <SidebarContent>
+        <NavMain items={navMainWithIcons} />
+      </SidebarContent>
+      
+      <SidebarFooter>
+        <NavUser user={user} />
+      </SidebarFooter>
+    </Sidebar>
+  )
 }
