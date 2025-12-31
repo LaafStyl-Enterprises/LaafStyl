@@ -13,7 +13,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 
-export function LoginForm({
+export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
@@ -26,20 +26,23 @@ export function LoginForm({
     const checkUser = async () => {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/initialize/check`);
       const data = await response.json();
-      if (!data.success) {
-        router.push("/signup");
+      if (data.success) {
+        router.push("/login");
       }
     }
     checkUser();
   },[])
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/sign-in`, {
+    const origin = window.location.origin
+    const verificationCallbackUrl = `${origin}/handle/verify-email`
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/initialize/create`, {
       method: "POST",
       body: JSON.stringify({ 
         email, 
         password, 
+        verification_callback_url: verificationCallbackUrl,
         
       }),
       headers: {
@@ -48,24 +51,21 @@ export function LoginForm({
       },
     });
     const data = await response.json();
-    const user = data.user;
     if (data.success) {
      toast.success(data.message);
-     if (user.role === "SUPER"){
-        router.push("/super");
-     }
+     
     } else {
       toast.error(data.message);
     }
   }
 
   return (
-    <form className={cn("flex flex-col gap-6", className)} onSubmit={handleLogin} {...props}>
+    <form className={cn("flex flex-col gap-6", className)} onSubmit={handleSignup} {...props}>
       <FieldGroup>
         <div className="flex flex-col items-center gap-1 text-center">
-          <h1 className="text-2xl font-bold">Login to your account</h1>
+          <h1 className="text-2xl font-bold">Sign up for an account</h1>
           <p className="text-muted-foreground text-sm text-balance">
-            Enter your email below to login to your account"
+            Enter your email below to sign up for an account"
           </p>
         </div>
         <Field>
@@ -84,7 +84,7 @@ export function LoginForm({
           <Input id="password" type="password" placeholder="********" required value={password} onChange={(e) => setPassword(e.target.value)} />
         </Field>
         <Field>
-          <Button type="submit">Login</Button>
+          <Button type="submit">Sign up</Button>
         </Field>
         {/* <FieldSeparator>Or continue with</FieldSeparator> */}
         <Field>
@@ -97,7 +97,12 @@ export function LoginForm({
             </svg>
             Login with GitHub
           </Button> */}
-          
+          <FieldDescription className="text-center">
+            Already have an account?
+            <a href="/login" className="underline underline-offset-4">
+              Login
+            </a>
+          </FieldDescription>
         </Field>
       </FieldGroup>
     </form>

@@ -1,28 +1,24 @@
 "use client"
-import Image from "next/image";
-import { LoginForm } from "@/components/ui/auth/login-form";
-import { GalleryVerticalEnd,Panda } from "lucide-react";
+import Link from "next/link";
+import { Panda } from "lucide-react";
+import { Button } from "@/components/ui/Button/button";
 
-export default function LoginPage() {
+export default function HomePage() {
   return (
-    <div className="grid min-h-svh lg:grid-cols-2">
-      <div className="flex flex-col gap-4 p-6 md:p-10">
-        <div className="flex justify-center gap-2 md:justify-start">
-          <a href="#" className="flex items-center gap-2 font-medium ">
-            <div className="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md">
-              <Panda className="size-4" />
-            </div>
-            LaafStyl
-          </a>
-        </div>
-        <div className="flex flex-1 items-center justify-center">
-          <div className="w-full max-w-xs">
-            <LoginForm />
+    <div className="flex min-h-svh flex-col items-center justify-center p-6">
+      <div className="flex flex-col items-center gap-8">
+        {/* Logo with bouncing panda */}
+        <div className="flex flex-col items-center gap-4">
+          <div className=" flex size-16 items-center justify-center ">
+            <Panda className="size-10 animate-bounce" />
           </div>
+          <h1 className="text-4xl font-bold tracking-tight">LaafStyl</h1>
         </div>
-      </div>
-      <div className=" relative hidden lg:block m-auto">
-        <img src="/Logo.jpeg" alt="logo" width={512} height={512} className="m-auto" />
+
+        {/* Continue Button */}
+        <Button asChild size="lg" className="mt-4">
+          <Link href="/login">Continue</Link>
+        </Button>
       </div>
     </div>
   )
