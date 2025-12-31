@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/Input/input"
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
+import { Eye, EyeOff } from "lucide-react"
 
 export function SignupForm({
   className,
@@ -20,6 +21,7 @@ export function SignupForm({
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -81,7 +83,29 @@ export function SignupForm({
               Forgot your password?
             </a>
           </div>
-          <Input id="password" type="password" placeholder="********" required value={password} onChange={(e) => setPassword(e.target.value)} />
+          <div className="relative">
+            <Input 
+              id="password" 
+              type={showPassword ? "text" : "password"} 
+              placeholder="********" 
+              required 
+              value={password} 
+              onChange={(e) => setPassword(e.target.value)}
+              className="pr-10"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+            >
+              {showPassword ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
+            </button>
+          </div>
         </Field>
         <Field>
           <Button type="submit">Sign up</Button>
