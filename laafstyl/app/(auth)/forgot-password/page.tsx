@@ -1,5 +1,5 @@
 "use client"
-import { ForgotPassword } from "@/components/ui/Auth/forgot-password";
+import { ForgotPassword } from "@/components/ui/auth/forgot-password";
 import { Panda } from "lucide-react";
 import { useState,useEffect } from "react";
 import { useRouter } from "next/navigation";

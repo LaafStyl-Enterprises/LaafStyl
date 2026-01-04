@@ -1,5 +1,5 @@
 "use client"
-import { SignupForm } from "@/components/ui/Auth/signup-form";
+import { SignupForm } from "@/components/ui/auth/signup-form";
 import { Panda } from "lucide-react";
 
 export default function LoginPage() {

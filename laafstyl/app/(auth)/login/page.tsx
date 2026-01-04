@@ -1,5 +1,5 @@
 "use client"
-import { LoginForm } from "@/components/ui/Auth/login-form";
+import { LoginForm } from "@/components/ui/auth/login-form";
 import { Panda } from "lucide-react";
 import { useState,useEffect } from "react";
 import { useRouter } from "next/navigation";

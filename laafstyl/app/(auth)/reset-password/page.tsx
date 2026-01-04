@@ -1,5 +1,5 @@
 "use client"
-import { ResetPassword } from "@/components/ui/Auth/reset-password";
+import { ResetPassword } from "@/components/ui/auth/reset-password";
 import { Panda } from "lucide-react";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
