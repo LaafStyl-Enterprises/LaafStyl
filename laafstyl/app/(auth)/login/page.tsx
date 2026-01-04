@@ -1,8 +1,21 @@
 "use client"
-import { SignupForm } from "@/components/ui/auth/signup-form";
+import { LoginForm } from "@/components/ui/Auth/login-form";
 import { Panda } from "lucide-react";
-
+import { useState,useEffect } from "react";
+import { useRouter } from "next/navigation";
 export default function LoginPage() {
+  const router = useRouter();
+
+  useEffect(()=>{
+    const checkUser = async () => {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/initialize/check`);
+      const data = await response.json();
+      if (!data.success) {
+        router.push("/signup");
+      }
+    }
+    checkUser();
+  },[])
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
       <div className="flex flex-col gap-4 p-6 md:p-10">
@@ -16,7 +29,7 @@ export default function LoginPage() {
         </div>
         <div className="flex flex-1 items-center justify-center">
           <div className="w-full max-w-xs">
-            <SignupForm />
+            <LoginForm  />
           </div>
         </div>
       </div>

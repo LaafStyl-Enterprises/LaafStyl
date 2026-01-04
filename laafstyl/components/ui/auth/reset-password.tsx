@@ -5,91 +5,81 @@ import {
   FieldDescription,
   FieldGroup,
   FieldLabel,
-  FieldSeparator,
 } from "@/components/ui/Field/field"
 import { Input } from "@/components/ui/Input/input"
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import { toast } from "sonner"
+import {  useEffect, useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Eye, EyeOff } from "lucide-react"
-import { Spinner } from "@/components/ui/Spinner/spinner"
+import { toast } from "sonner"
 
-
-export function LoginForm({
+export function ResetPassword({
   className,
   ...props
 }: React.ComponentProps<"form">) {
 
-  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
   const router = useRouter();
-
+  const query = useSearchParams();
+  const codeParam = query.get("code");
+  const [isValidCode, setIsValidCode] = useState(false);
   useEffect(() => {
-    const checkUser = async () => {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/initialize/check`);
-      const data = await response.json();
-      if (!data.success) {
-        router.push("/signup");
+
+    const checkCode = async () => {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/validate-reset-code`, {
+        method: "POST",
+        body: JSON.stringify({ code: codeParam }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const result = await response.json();
+      if (response.ok && result.success) {
+        setIsValidCode(true);
+      } else {
+        setIsValidCode(false);
       }
     }
-    checkUser();
-  },[])
+    if (codeParam) {
+      checkCode();
+    }
+  },[codeParam])
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/sign-in`, {
-      method: "POST",
-      body: JSON.stringify({ 
-        email, 
-        password, 
-      }),
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-    const data = await response.json();
-    const user = data.user;
-    if (user) {
-      sessionStorage.setItem("user", JSON.stringify(user));
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/reset`, {
+        method: "POST",
+        body: JSON.stringify({ code: codeParam, new_password: password.trim() }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const result = await response.json();
+      if (response.ok && result.success) {
+        toast.success(result.message);
+        router.push("/login");
+      } else {
+        toast.error(result.message);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error((error as Error).message);
     }
-    if (data.success) {
-     toast.success(data.message);
-     if (user.role === "SUPER"){
-        router.push("/super");
-     }
-    } else {
-      toast.error(data.message);
-    }
-    setLoading(false);
   }
-
   return (
-    <form className={cn("flex flex-col gap-6", className)} onSubmit={handleLogin} {...props}>
+    <form className={cn("flex flex-col gap-6", className)} onSubmit={handleResetPassword} {...props}>
       <FieldGroup>
         <div className="flex flex-col items-center gap-1 text-center">
-          <h1 className="text-2xl font-bold">Login to your account</h1>
+          <h1 className="text-2xl font-bold">Reset your password</h1>
           <p className="text-muted-foreground text-sm text-balance">
-            Enter your email below to login to your account"
+            Enter your password below to reset your password"
           </p>
         </div>
+        
         <Field>
-          <FieldLabel htmlFor="email">Email</FieldLabel>
-          <Input id="email" type="email" placeholder="m@example.com" required value={email} onChange={(e) => setEmail(e.target.value)} />
-        </Field>
-        <Field>
-          <div className="flex items-center">
-            <FieldLabel htmlFor="password">Password</FieldLabel>
-            <a
-              className="ml-auto text-sm underline-offset-4 hover:underline cursor-pointer"
-              onClick={() => router.push("/forgot-password")}
-            >
-              Forgot your password?
-            </a>
-          </div>
+        
           <div className="relative">
             <Input 
               id="password" 
@@ -115,9 +105,7 @@ export function LoginForm({
           </div>
         </Field>
         <Field>
-          <Button type="submit" disabled={loading}>
-            {loading ? <Spinner className="w-4 h-4 mr-2" /> : "Login"}
-          </Button>
+          <Button type="submit">Reset Password</Button>
         </Field>
         {/* <FieldSeparator>Or continue with</FieldSeparator> */}
         <Field>
@@ -130,7 +118,12 @@ export function LoginForm({
             </svg>
             Login with GitHub
           </Button> */}
-          
+          <FieldDescription className="text-center">
+            Back to login?
+            <a href="/login" className="underline underline-offset-4">
+              Back to login
+            </a>
+          </FieldDescription>
         </Field>
       </FieldGroup>
     </form>

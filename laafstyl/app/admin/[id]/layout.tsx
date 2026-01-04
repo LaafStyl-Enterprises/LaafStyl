@@ -5,9 +5,15 @@ import {
   SidebarInset,
   SidebarProvider,
 } from "@/components/ui/Sidebar/index"
+import { usePathname } from "next/navigation"
 import { useState, useEffect } from "react"
+import { useParams } from "next/navigation"
 
 export default function Layout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname()
+  const params = useParams()
+  const id = params.id as string
+  const title = pathname.split("/").pop()?.toUpperCase() || "Home"
   const [user, setUser] = useState({ name: "", email: "" })
 
   useEffect(() => {
@@ -39,17 +45,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     navMain: [
       {
         title: "Home",
-        url: "/super",
+        url: `/admin/${id}`,
         icon: "Home",
       },
       {
-        title: "Organizations",
-        url: "/super/organizations",
-        icon: "Building",
-      },
-      {
         title: "Members",
-        url: "/super/members",
+        url: `/admin/${id}/members`,
         icon: "Users",
       },
     ],
@@ -66,7 +67,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     >
       <AppSidebar variant="inset" navMain={data.navMain} user={data.user} />
       <SidebarInset>
-        <SiteHeader />
+        <SiteHeader title={title} />
         <div className="flex flex-1 flex-col">
           <div className="@container/main flex flex-1 flex-col gap-2">
             <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6 px-4">
