@@ -1,5 +1,6 @@
 "use client"
 import { ResetPassword } from "@/components/ui/auth/reset-password";
+import { Suspense } from "react";
 import { Panda } from "lucide-react";
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
@@ -31,7 +32,9 @@ export default function LoginPage() {
         </div>
         <div className="flex flex-1 items-center justify-center">
           <div className="w-full max-w-xs">
-            <ResetPassword  />
+            <Suspense fallback={<div>Loading...</div>}>
+              <ResetPassword  />
+            </Suspense>
           </div>
         </div>
       </div>
