@@ -12,6 +12,7 @@ import {  useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Eye, EyeOff } from "lucide-react"
 import { toast } from "sonner"
+import { Spinner } from "@/components/ui/Spinner/spinner"
 
 export function ResetPassword({
   className,
@@ -20,6 +21,7 @@ export function ResetPassword({
 
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
   const query = useSearchParams();
   const codeParam = query.get("code");
@@ -48,6 +50,7 @@ export function ResetPassword({
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/reset`, {
         method: "POST",
@@ -62,10 +65,14 @@ export function ResetPassword({
         router.push("/login");
       } else {
         toast.error(result.message);
+        router.push("/login");
       }
     } catch (error) {
       console.error(error);
       toast.error((error as Error).message);
+      router.push("/login");
+    } finally {
+      setLoading(false);
     }
   }
   return (
@@ -105,7 +112,16 @@ export function ResetPassword({
           </div>
         </Field>
         <Field>
-          <Button type="submit">Reset Password</Button>
+          <Button type="submit" disabled={loading}>
+            {loading ? (
+              <>
+                <Spinner className="w-4 h-4 mr-2" />
+                Resetting...
+              </>
+            ) : (
+              "Reset Password"
+            )}
+          </Button>
         </Field>
         {/* <FieldSeparator>Or continue with</FieldSeparator> */}
         <Field>
