@@ -22,6 +22,7 @@ import { Eye, EyeOff, Plus } from "lucide-react"
 import { useAuthFetch } from "@/hooks/useAuthFetch"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
+import { Spinner } from "@/components/ui/Spinner/spinner"
 
 type Organization = {
     id: number
@@ -43,14 +44,18 @@ export function AddUserDialog() {
   const [organizations, setOrganizations] = useState<Organization[]>([])
   const [selectedOrganizationId, setSelectedOrganizationId] = useState<string>("")
   const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    setLoading(true)
     const formData = new FormData(e.target as HTMLFormElement)
     const data = Object.fromEntries(formData)
     
-    const callback_url = `${window.location.origin}/reset-password`
+    const origin = window.location.origin
+    const callback_url = `${origin}/reset-password`
+    const verification_callback_url = `${origin}/handle/verify-email`
     
     const payload: Record<string, any> = {
       first_name: data.first_name,
@@ -60,6 +65,7 @@ export function AddUserDialog() {
       phone_number: data.phone_number || "",
       role: data.role,
       callback_url: callback_url,
+      verification_callback_url: verification_callback_url,
     }
     
     // Add organization_id only if role is ADMIN
@@ -91,6 +97,8 @@ export function AddUserDialog() {
     } catch (error) {
       console.error("Failed to create user:", error)
       toast.error("Failed to create user")
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -145,7 +153,6 @@ export function AddUserDialog() {
                   id="first_name" 
                   name="first_name" 
                   placeholder="John" 
-                  required 
                 />
               </Field>
               <Field>
@@ -154,7 +161,6 @@ export function AddUserDialog() {
                   id="last_name" 
                   name="last_name" 
                   placeholder="Doe" 
-                  required 
                 />
               </Field>
             </div>
@@ -243,11 +249,20 @@ export function AddUserDialog() {
           </FieldGroup>
           <DialogFooter className="gap-2 sm:gap-0 mt-6">
             <DialogClose asChild>
-              <Button type="button" variant="outline">
+              <Button type="button" variant="outline" disabled={loading}>
                 Cancel
               </Button>
             </DialogClose>
-            <Button type="submit">Create Member</Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? (
+                <>
+                  <Spinner className="w-4 h-4 mr-2" />
+                  Creating...
+                </>
+              ) : (
+                "Create Member"
+              )}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>

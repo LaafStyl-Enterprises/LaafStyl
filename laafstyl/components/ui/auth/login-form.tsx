@@ -58,8 +58,10 @@ export function LoginForm({
     }
     if (data.success) {
      toast.success(data.message);
-     if (user.role === "SUPER"){
+     if (user.role === "SUPER") {
         router.push("/super");
+     } else if (user.role === "ADMIN" && user.organizations && user.organizations.length === 1) {
+        router.push(`/admin/${user.organizations[0].id}`);
      }
     } else {
       toast.error(data.message);

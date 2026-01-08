@@ -7,11 +7,27 @@ import {
 } from "@/components/ui/Sidebar/index"
 import { useState, useEffect } from "react"
 import { useParams } from "next/navigation"
+import { useAuthFetch } from "@/hooks/useAuthFetch"
+
+type Organization = {
+    id: number
+    name: string
+    email: string
+    description: string | null
+    website: string
+    phone_number: string | null
+    address: string
+    city: string | null
+    country: string | null
+    createdAt: string
+    regionId: number | null
+}
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const params = useParams()
   const id = params.id as string
   const [user, setUser] = useState({ name: "", email: "" })
+  const [organization, setOrganization] = useState<Organization | null>(null)
 
   useEffect(() => {
     try {
@@ -33,6 +49,34 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       setUser({ name: "", email: "" })
     }
   }, [])
+
+  useEffect(() => {
+    const fetchOrganization = async () => {
+      if (!id) return
+      
+      try {
+        const options = {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+        const response = await useAuthFetch(`/organization/${id}`, options)
+        const result = await response.json()
+        
+        if (response.ok && result.success && result.data) {
+          setOrganization(result.data)
+        } else if (response.ok && result.name) {
+          // Handle case where data might be directly in result
+          setOrganization(result)
+        }
+      } catch (error) {
+        console.error("Failed to fetch organization:", error)
+      }
+    }
+    
+    fetchOrganization()
+  }, [id])
   const data = {
     user: {
       name: user.name,
@@ -62,7 +106,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         } as React.CSSProperties
       }
     >
-      <AppSidebar variant="inset" navMain={data.navMain} user={data.user} />
+      <AppSidebar variant="inset" navMain={data.navMain} user={data.user} organization={organization} />
       <SidebarInset>
         <SiteHeader />
         <div className="flex flex-1 flex-col">

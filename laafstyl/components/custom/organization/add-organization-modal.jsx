@@ -20,10 +20,16 @@ import {
 } from "@/components/ui/Field/field"
 import { Eye, EyeOff, MapPin, Plus } from "lucide-react"
 import { useAuthFetch } from "@/hooks/useAuthFetch"
+import { toast } from "sonner"
+import { Spinner } from "@/components/ui/Spinner/spinner"
 
 export function AddOrganizationModal() {
+  const [open, setOpen] = useState(false)
+  const [loading, setLoading] = useState(false)
+
   const handlesubmit = async (e) => {
     e.preventDefault();
+    setLoading(true)
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData);
     const options = {
@@ -33,16 +39,23 @@ export function AddOrganizationModal() {
         "Content-Type": "application/json",
       },
     }
-    const response = await useAuthFetch("/organization", options);
-    if (response.ok) {
-      toast.success("Organization created successfully");
-      Dialog.close();
-    } else {
+    try {
+      const response = await useAuthFetch("/organization", options);
+      if (response.ok) {
+        toast.success("Organization created successfully");
+        setOpen(false)
+      } else {
+        toast.error("Failed to create organization");
+      }
+    } catch (error) {
+      console.error("Failed to create organization:", error)
       toast.error("Failed to create organization");
+    } finally {
+      setLoading(false)
     }
   }
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button><Plus className="w-4 h-4" /> Add Organization</Button>
       </DialogTrigger>
@@ -147,11 +160,20 @@ export function AddOrganizationModal() {
           </FieldGroup>
           <DialogFooter className="gap-2 sm:gap-0 mt-6">
             <DialogClose asChild>
-              <Button type="button" variant="outline">
+              <Button type="button" variant="outline" disabled={loading}>
                 Cancel
               </Button>
             </DialogClose>
-            <Button type="submit">Create Organization</Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? (
+                <>
+                  <Spinner className="w-4 h-4 mr-2" />
+                  Creating...
+                </>
+              ) : (
+                "Create Organization"
+              )}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
