@@ -6,7 +6,8 @@ import {
   Building,
   Users,
   LucideIcon,
-  Panda
+  Panda,
+  Truck
 } from "lucide-react"
 import { useRouter } from "next/navigation"
 
@@ -27,6 +28,7 @@ const iconMap: Record<string, LucideIcon> = {
   Home,
   Building,
   Users,
+  Truck,
 }
 
 type Organization = {

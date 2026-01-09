@@ -34,7 +34,7 @@ export default function LoginPage() {
         </div>
       </div>
       <div className=" relative hidden lg:block m-auto">
-        <img src="/Logo.jpeg" alt="logo" width={512} height={512} className="m-auto" />
+        <img src="/LaafstylLogo.png" alt="logo" width={512} height={512} className="m-auto" />
       </div>
     </div>
   )

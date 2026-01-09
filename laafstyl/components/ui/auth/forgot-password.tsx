@@ -13,6 +13,7 @@ import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { ArrowLeft } from "lucide-react"
+import { Spinner } from "@/components/ui/Spinner/spinner"
 
 export function ForgotPassword({
   className,
@@ -21,22 +22,29 @@ export function ForgotPassword({
 
   const [email, setEmail] = useState("");
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     const callback_url = `${window.location.origin}/reset-password`;
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/send-reset-code`, {
         method: "POST",
+        headers:{
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({ email, callback_url }),
       });
       const data = await response.json();
       if (data.success) {
-        toast.success(data.message);
+        toast.success(data.success);
       } else {
-        toast.error(data.message);
+        toast.error(data.error);
       }
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -62,7 +70,9 @@ export function ForgotPassword({
             >
               Back to login
             </button>
-            <Button type="submit" className="ml-auto">Send Reset Code</Button>
+            <Button type="submit" className="ml-auto" disabled={loading}>
+              {loading ? <Spinner className="size-4" /> : "Send Reset Code"}
+            </Button>
           </div>
         </Field>
         {/* <FieldSeparator>Or continue with</FieldSeparator> */}

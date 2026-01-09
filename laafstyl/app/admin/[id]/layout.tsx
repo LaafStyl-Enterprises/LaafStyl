@@ -94,8 +94,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         url: `/admin/${id}/members`,
         icon: "Users",
       },
+     
     ],
    
+  }
+  if (organization?.name === "Laafstyl Mobility") {
+    data.navMain.push({
+      title: "Drivers",
+      url: `/admin/${id}/drivers`,
+      icon: "Truck",
+    })
   }
   return (
     <SidebarProvider
