@@ -22,6 +22,7 @@ import { Plus, ArrowLeft, Upload, X } from "lucide-react"
 import { toast } from "sonner"
 import { useRouter, useParams } from "next/navigation"
 import { Spinner } from "@/components/ui/Spinner/spinner"
+import { useAuthFetch } from "@/hooks/useAuthFetch"
 
 export function AddDriverDialog() {
   const [step, setStep] = useState(1)
@@ -56,18 +57,21 @@ export function AddDriverDialog() {
 
   const handleLicenseUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
-    if (file) {
-      if (file.type.startsWith("image/")) {
-        setLicenseFile(file)
-        const reader = new FileReader()
-        reader.onloadend = () => {
-          setLicensePreview(reader.result as string)
-        }
-        reader.readAsDataURL(file)
-      } else {
-        toast.error("Please upload an image file")
-      }
+    if (!file) return
+    
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload an image file")
+      return
     }
+
+    setLicenseFile(file)
+    
+    // Create preview
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      setLicensePreview(reader.result as string)
+    }
+    reader.readAsDataURL(file)
   }
 
   const removeLicense = () => {
@@ -83,30 +87,55 @@ export function AddDriverDialog() {
     }
 
     setLoading(true)
-    const submitData = new FormData()
-    submitData.append("first_name", formData.first_name)
-    submitData.append("last_name", formData.last_name)
-    submitData.append("email", formData.email)
-    submitData.append("phone_number", formData.phone_number)
-    submitData.append("organization_id", organizationId)
-    submitData.append("license", licenseFile)
 
     try {
-      const user = JSON.parse(sessionStorage.getItem("user") || "{}")
-      const api_url = process.env.NEXT_PUBLIC_API_URL
+      // Step 1: Upload file to /upload/multiple
+      const uploadData = new FormData()
+      uploadData.append("files", licenseFile)
       
-      const response = await fetch(`${api_url}/driver`, {
+      const uploadOptions = {
         method: "POST",
+        body: uploadData,
+      }
+      
+      const uploadResponse = await useAuthFetch("/upload/multiple", uploadOptions)
+      const uploadResult = await uploadResponse.json()
+      
+      if (!uploadResponse.ok || !uploadResult.success || !uploadResult.data || uploadResult.data.length === 0) {
+        toast.error(uploadResult.message || "Failed to upload license file")
+        setLoading(false)
+        return
+      }
+
+      const uploadedFile = uploadResult.data[0]
+      
+      // Step 2: Create driver with document info
+      const driverData = {
+        name: `${formData.first_name} ${formData.last_name}`,
+        email: formData.email,
+        phone_number: formData.phone_number,
+        organization_id: parseInt(organizationId),
+        documents: [
+          {
+            documentType: "license",
+            documentUrl: uploadedFile.documentUrl,
+          },
+        ],
+      }
+      
+      const driverOptions = {
+        method: "POST",
+        body: JSON.stringify(driverData),
         headers: {
-          "Authorization": `Bearer ${user.access_token}`,
+          "Content-Type": "application/json",
         },
-        body: submitData,
-      })
+      }
       
-      const result = await response.json()
+      const driverResponse = await useAuthFetch("/drivers", driverOptions)
+      const driverResult = await driverResponse.json()
       
-      if (response.ok && result.success) {
-        toast.success(result.message || "Driver created successfully")
+      if (driverResponse.ok && driverResult.success) {
+        toast.success(driverResult.message || "Driver created successfully")
         setOpen(false)
         setStep(1)
         setFormData({ first_name: "", last_name: "", email: "", phone_number: "" })
@@ -114,7 +143,7 @@ export function AddDriverDialog() {
         setLicensePreview(null)
         router.refresh()
       } else {
-        toast.error(result.message || "Failed to create driver")
+        toast.error(driverResult.message || "Failed to create driver")
       }
     } catch (error) {
       console.error("Failed to create driver:", error)
@@ -218,6 +247,7 @@ export function AddDriverDialog() {
                       id="license"
                       accept="image/*"
                       onChange={handleLicenseUpload}
+                      capture="user"
                       className="hidden"
                     />
                     <label

@@ -51,6 +51,11 @@ export function LoginForm({
         "Content-Type": "application/json",
       },
     });
+    if (!response.ok) {
+      toast.error("Invalid email or password");
+      setLoading(false);
+      return;
+    }
     const data = await response.json();
     const user = data.user;
     if (user) {

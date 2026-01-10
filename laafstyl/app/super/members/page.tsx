@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/Dropdown/dropdown-menu"
 import { AddUserDialog } from "@/components/custom/user/add-user-dialog"
+import { UserGroupMobileCard } from "@/components/custom/user/user-group-mobilecard"
 import { useEffect, useState } from "react"
 import { useAuthFetch } from "@/hooks/useAuthFetch"
 
@@ -136,7 +137,10 @@ export default function UsersPage() {
             <div className="flex items-center justify-end p-4">
                 <AddUserDialog />
             </div>
-            <DataTable columns={columns} data={data} />
+            <div className="hidden md:block">
+                <DataTable columns={columns} data={data} />
+            </div>
+            <UserGroupMobileCard users={data} />
         </div>
     )
 }
